@@ -2,9 +2,19 @@
 
 #include <iostream>
 #include <assert.h>
+#include <thread>
+#include <mutex>
+#include <vector>
 
-const size_t NLIST = 240;  
+#ifdef _WIN32
+#include <windows.h>
+#endif // _WIN32
+
+const size_t NLIST = 240;
 const size_t MAXBYTES = 64 * 1024 * 1024;
+const size_t PAGE_SHIFT = 12;
+const size_t NPAGE = 129; //128+1
+
 
 //拿到头四个字节
 static inline void*& NextObj(void* ptr)
@@ -27,7 +37,7 @@ public:
 		_list = obj;
 		_size++;
 	}
-	
+
 	void* Pop()
 	{
 		assert(_list);
@@ -86,7 +96,7 @@ public:
 		{
 			return _RoundUp(size, 8);
 		}
-		else if (size <=1024)
+		else if (size <= 1024)
 		{
 			return _RoundUp(size, 16);
 		}
@@ -112,7 +122,7 @@ public:
 		//static int group[4] = { 16, 56, 56, 112 }; //每个区间的自由链表数
 
 		//可以简化成每个区间+之前区间的所有链表数
-		static int group_arr[4] = { 16, 72, 128, 240 }; 
+		static int group_arr[4] = { 16, 72, 128, 240 };
 
 		if (bytes <= 128)
 		{
@@ -135,5 +145,112 @@ public:
 			return -1;
 		}
 	}
+
+	static size_t NumMoveSize(size_t size)
+	{
+		if (size == 0)
+			return 0;
+
+		int num = static_cast<int>(MAXBYTE / size);
+		if (num < 2)
+			num = 2;
+
+		if (num > 512)
+			num = 512;
+
+		return num;
+	}
+
+	//计算一次像系统获得几页
+	static size_t NumMovePage(size_t size)
+	{
+		size_t num = NumMoveSize(size);
+		size_t npage = size*num;
+
+		npage <<= 12;
+		if (npage == 0)//如果申请的不过一页那就给一页
+			npage = 1;
+
+		return npage;
+	}
 };
 
+
+
+typedef size_t PageId;
+struct Span
+{
+	PageId _page_id; //页号
+	size_t _page_num; //页的数量
+
+	void* _objlist = nullptr; //用来管理对象自由链表
+	size_t _objsize = 0; //对象大小
+	size_t _usecount = 0;  //计数，已使用个数
+
+	Span* _next = nullptr;
+	Span* _pre = nullptr;
+};
+
+class SpanList
+{
+public:
+	SpanList()
+	{
+		_head = new Span;
+		_head->_next = _head;
+		_head->_pre = _head;
+	}
+
+	Span* begin()
+	{
+		return _head->_next;
+	}
+
+	Span* end()
+	{
+		return _head;
+	}
+
+	bool Empty()
+	{
+		return _head->_next = _head;
+	}
+
+	void Insert(Span* pos, Span *newspan)
+	{
+		assert(pos);
+		Span* pre = pos->_pre;
+
+		pre->_next = newspan;
+		newspan->_pre = pre;
+
+		newspan->_next = pos;
+		pos->_pre = newspan;
+	}
+
+	void Earse(Span* pos)
+	{
+		assert(pos && pos != _head);
+		Span* pre = pos->_pre;
+		Span* next = pos->_next;
+
+		pre->_next = next;
+		next->_pre = pre;
+	}
+
+	void PushFront(Span* newspan)
+	{
+		assert(newspan);
+		Insert(begin(), newspan);
+	}
+
+	Span* PopFront()
+	{
+		Span* cur = begin();
+		Earse(cur);
+		return cur;
+	}
+
+private:
+	Span* _head = nullptr;
+};

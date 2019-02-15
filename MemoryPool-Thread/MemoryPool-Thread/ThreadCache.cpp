@@ -1,10 +1,20 @@
 #include "Comm.h"
-#include "ThreadCache.h"
+#include "CentralCache.h"
 
 void* ThreadCache::FetchFromCentralCache(size_t index, size_t bytes)
 {
 	FreeList& freelist = _freelist[index];
+	size_t num = 10; //一次批量获取十块
 
+	void* start = nullptr;
+	void* end = nullptr;
+	size_t fetchnum = CentralCache::GetInstance()->FetchRangeObj(start, end, num, bytes);
+
+	if (fetchnum == 1) //当中心缓存不够
+		return start;
+
+	freelist.PushRange(NextObj(start), end, fetchnum - 1);
+	return start;
 }
 
 void* ThreadCache::Allocate(size_t size)
@@ -23,7 +33,7 @@ void* ThreadCache::Allocate(size_t size)
 	//自由链表没有内存，要到CentralCache去获取
 	else
 	{
-		return FetchFromCentralCache(size, index);
+		return FetchFromCentralCache(index, size);
 	}
 }
 

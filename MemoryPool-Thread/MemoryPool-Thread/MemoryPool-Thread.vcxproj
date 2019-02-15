@@ -64,10 +64,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CentralCache.h" />
     <ClInclude Include="Comm.h" />
+    <ClInclude Include="PageCache.h" />
     <ClInclude Include="ThreadCache.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CentralCache.cpp" />
+    <ClCompile Include="PageCache.cpp" />
+    <ClCompile Include="test.cpp" />
     <ClCompile Include="ThreadCache.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
