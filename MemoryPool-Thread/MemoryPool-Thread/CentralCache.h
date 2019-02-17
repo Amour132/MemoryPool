@@ -2,6 +2,7 @@
 
 #include "Comm.h"
 #include "ThreadCache.h"
+#include "PageCache.h"
 
 
 //单例模式，不用加锁，提高了效率

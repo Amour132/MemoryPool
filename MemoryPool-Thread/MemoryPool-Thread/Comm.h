@@ -63,6 +63,19 @@ public:
 	{
 		return _maxsize;
 	}
+
+	void SetMaxSize(size_t maxsize)
+	{
+		_maxsize = maxsize;
+	}
+
+	void* Clear()
+	{
+		_size = 0;
+		void* list = _list;
+		_list = nullptr;
+		return list;
+	}
 private:
 	void* _list = nullptr;
 	size_t _size = 0;
@@ -251,6 +264,8 @@ public:
 		return cur;
 	}
 
+public:
+	std::mutex _mtx;
 private:
 	Span* _head = nullptr;
 };

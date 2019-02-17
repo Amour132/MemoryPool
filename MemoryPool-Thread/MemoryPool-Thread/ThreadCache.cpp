@@ -37,10 +37,22 @@ void* ThreadCache::Allocate(size_t size)
 	}
 }
 
-void ThreadCache::Deallocate(void* ptr, size_t size)
+void TooLongRecyle(FreeList* freelist, size_t byte)
 {
-	assert(size < MAXBYTES);
-	size_t index = ClassSize::Index(size);
+	void* start = freelist->Clear();
+	CentralCache::GetInstance()->ReleaseToSpan(start, byte);
+}
+
+void ThreadCache::Deallocate(void* ptr, size_t byte)
+{
+	assert(byte < MAXBYTES);
+	size_t index = ClassSize::Index(byte);
 	FreeList& freelist = _freelist[index];
 	freelist.Push(ptr);
+	
+	//当自由链表的长度大于一次可申请的最大长度是开始进行回收
+	if (freelist.Size() >= freelist.MaxSize())
+	{
+		TooLongRecyle(&freelist, byte);
+	}
 }
