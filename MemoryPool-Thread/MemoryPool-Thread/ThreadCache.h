@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include "Comm.h"
 
 class ThreadCache

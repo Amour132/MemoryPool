@@ -1,8 +1,9 @@
-#include "Comm.h"
+#include "ThreadCache.h"
 #include "CentralCache.h"
 
 void* ThreadCache::FetchFromCentralCache(size_t index, size_t bytes)
 {
+	
 	FreeList& freelist = _freelist[index];
 	size_t num = 10; //一次批量获取十块
 

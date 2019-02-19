@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <unordered_map>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -79,7 +80,7 @@ public:
 private:
 	void* _list = nullptr;
 	size_t _size = 0;
-	size_t _maxsize = 0;
+	size_t _maxsize = 1;
 };
 
 //管理内存对齐问题
@@ -121,6 +122,7 @@ public:
 		{
 			return _RoundUp(size, 512);
 		}
+		return -1;
 	}
 
 	//确定内存块得位置
@@ -164,7 +166,7 @@ public:
 		if (size == 0)
 			return 0;
 
-		int num = static_cast<int>(MAXBYTE / size);
+		int num = (int)(MAXBYTE / size);
 		if (num < 2)
 			num = 2;
 
@@ -180,7 +182,7 @@ public:
 		size_t num = NumMoveSize(size);
 		size_t npage = size*num;
 
-		npage <<= 12;
+		npage >>= 12;
 		if (npage == 0)//如果申请的不过一页那就给一页
 			npage = 1;
 
@@ -226,7 +228,7 @@ public:
 
 	bool Empty()
 	{
-		return _head->_next = _head;
+		return _head->_next == _head;
 	}
 
 	void Insert(Span* pos, Span *newspan)

@@ -24,5 +24,8 @@ private:
 	PageCache(const PageCache& p) = delete;
 	PageCache& operator=(const PageCache& p) = delete;
 
+	//完成Span和页号的映射
+	std::unordered_map<PageId, Span*> _id_span_map;
+
 	static PageCache _inst;
 };

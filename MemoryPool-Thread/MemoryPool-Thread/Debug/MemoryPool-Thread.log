@@ -1,0 +1,40 @@
+﻿生成启动时间为 2019/2/19 17:17:22。
+     1>项目“E:\testgit\MemoryPool\MemoryPool-Thread\MemoryPool-Thread\MemoryPool-Thread.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         D:\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CentralCache.cpp ThreadCache.cpp test.cpp
+         test.cpp
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(15): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(17): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(17): error C2061: 语法错误: 标识符“ThreadCache”
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(19): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(19): error C2227: “->Allocate”的左边必须指向类/结构/联合/泛型类型
+                 类型是“unknown-type”
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(31): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(31): error C2227: “->Deallocate”的左边必须指向类/结构/联合/泛型类型
+                 类型是“unknown-type”
+         ThreadCache.cpp
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(15): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(17): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(17): error C2061: 语法错误: 标识符“ThreadCache”
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(19): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(19): error C2227: “->Allocate”的左边必须指向类/结构/联合/泛型类型
+                 类型是“unknown-type”
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(31): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(31): error C2227: “->Deallocate”的左边必须指向类/结构/联合/泛型类型
+                 类型是“unknown-type”
+         CentralCache.cpp
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(15): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(17): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(17): error C2061: 语法错误: 标识符“ThreadCache”
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(19): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(19): error C2227: “->Allocate”的左边必须指向类/结构/联合/泛型类型
+                 类型是“unknown-type”
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(31): error C2065: “tls_threadcache”: 未声明的标识符
+     1>e:\testgit\memorypool\memorypool-thread\memorypool-thread\concurrentalloc.h(31): error C2227: “->Deallocate”的左边必须指向类/结构/联合/泛型类型
+                 类型是“unknown-type”
+         正在生成代码...
+     1>已完成生成项目“E:\testgit\MemoryPool\MemoryPool-Thread\MemoryPool-Thread\MemoryPool-Thread.vcxproj”(Build 个目标)的操作 - 失败。
+
+生成失败。
+
+已用时间 00:00:05.76

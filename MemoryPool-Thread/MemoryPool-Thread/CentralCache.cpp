@@ -1,5 +1,5 @@
 #include "CentralCache.h"
-
+#include "PageCache.h"
 
 CentralCache CentralCache::_inst;
 
@@ -39,7 +39,7 @@ Span* CentralCache::GetOneSpan(SpanList* spanlist, size_t bytes)
 	return newspan;
 }
 
-size_t CentralCache::FetchRangeObj(void* start, void* end, size_t n, size_t bytes)
+size_t CentralCache::FetchRangeObj(void*& start, void*& end, size_t n, size_t bytes)
 {
 	//计算位置
 	size_t index = ClassSize::Index(bytes);
@@ -79,7 +79,25 @@ void CentralCache::ReleaseToSpan(void* start, size_t byte_size)
 
 	while (start)
 	{
+		void* next = NextObj(start);
+		//将span进行映射，为了后面的合并
+		Span* span = PageCache::GetInstance()->MapObjectToSpan(start);
 
+		if (--span->_usecount == 0)//说明span里面的对象都是空闲的可以还给PageCache进行合并
+		{
+			spanlist->Earse(span);
+
+			span->_objlist = nullptr;
+			span->_objsize = 0;
+			span->_pre = nullptr;
+			span->_next = nullptr;
+
+			PageCache::GetInstance()->ReleaseSpanToPageCahce(span);
+		}
+
+		NextObj(start) = span->_objlist;
+		span->_objlist = start;
+
+		start = next;
 	}
-
 }

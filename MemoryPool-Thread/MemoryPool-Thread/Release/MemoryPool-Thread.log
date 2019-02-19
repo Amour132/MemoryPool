@@ -1,0 +1,20 @@
+﻿生成启动时间为 2019/2/19 23:13:34。
+     1>项目“E:\testgit\MemoryPool\MemoryPool-Thread\MemoryPool-Thread\MemoryPool-Thread.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         D:\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CentralCache.cpp PageCache.cpp test.cpp ThreadCache.cpp
+         CentralCache.cpp
+         PageCache.cpp
+         test.cpp
+         ThreadCache.cpp
+       Link:
+         D:\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\testgit\MemoryPool\MemoryPool-Thread\Release\MemoryPool-Thread.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\testgit\MemoryPool\MemoryPool-Thread\Release\MemoryPool-Thread.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\testgit\MemoryPool\MemoryPool-Thread\Release\MemoryPool-Thread.lib" /MACHINE:X86 /SAFESEH Release\CentralCache.obj
+         Release\PageCache.obj
+         Release\test.obj
+         Release\ThreadCache.obj
+     1>ThreadCache.obj : error LNK2001: 无法解析的外部符号 "public: void __thiscall ThreadCache::TooLongRecyle(class FreeList *,unsigned int)" (?TooLongRecyle@ThreadCache@@QAEXPAVFreeList@@I@Z)
+     1>E:\testgit\MemoryPool\MemoryPool-Thread\Release\MemoryPool-Thread.exe : fatal error LNK1120: 1 个无法解析的外部命令
+     1>已完成生成项目“E:\testgit\MemoryPool\MemoryPool-Thread\MemoryPool-Thread\MemoryPool-Thread.vcxproj”(Build 个目标)的操作 - 失败。
+
+生成失败。
+
+已用时间 00:00:12.49
