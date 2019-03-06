@@ -2,7 +2,6 @@
 
 #include "Comm.h"
 
-//单例模式，不用加锁，提高了效率
 class CentralCache
 {
 public:
@@ -10,22 +9,21 @@ public:
 	{
 		return &_inst;
 	}
-	//获取一个span
+
 	Span* GetOneSpan(SpanList* spanlist, size_t bytes);
 
 	// 从中心缓存获取一定数量的对象给thread cache
-	size_t FetchRangeObj(void*& start, void*& end, size_t n, size_t bytes);
+	size_t FetchRangeObj(void*& start, void*& end, size_t n, size_t byte);
 
-	//如果有很多空闲空间，则将其归还到Span
-	void ReleaseToSpan(void* start, size_t byte_size);
-
-
+	// 将一定数量的对象释放到span跨度
+	void ReleaseListToSpans(void* start, size_t byte_size);
 private:
-	SpanList _spanlist[NLIST];
-
+	// 中心缓存自由链表
+	SpanList _spanlist[NLISTS];
+private:
 	CentralCache() = default;
-	CentralCache(const CentralCache& c) = delete;
-	CentralCache& operator=(const CentralCache& c) = delete;
+	CentralCache(const CentralCache&) = delete;
+	CentralCache& operator=(const CentralCache&) = delete;
 
 	static CentralCache _inst;
 };

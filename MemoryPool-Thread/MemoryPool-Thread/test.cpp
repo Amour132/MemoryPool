@@ -1,6 +1,5 @@
-#include "ConcurrentAlloc.h"
-#include "Comm.h"
-
+#include "Alloc.h"
+#include "benchmark.h"
 void TestConcurrentAlloc()
 {
 	size_t n = 100000;
@@ -14,7 +13,7 @@ void TestConcurrentAlloc()
 
 	for (size_t i = 0; i < n; ++i)
 	{
-		ConcurrentFree(v[i], 10);
+		ConcurrentFree(v[i]);
 	}
 	v.clear();
 
@@ -26,15 +25,16 @@ void TestConcurrentAlloc()
 
 	for (size_t i = 0; i < n; ++i)
 	{
-		ConcurrentFree(v[i], 10);
+		ConcurrentFree(v[i]);
 	}
 	v.clear();
 }
 
-
-
 int main()
 {
-	TestConcurrentAlloc();
+	BenchmarkMalloc(1000, 4, 10);
+	BenchmarkMyMalloc(1000, 4, 10);
+	//TestPageCache();
+	//TestConcurrentAlloc();
 	return 0;
 }

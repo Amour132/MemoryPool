@@ -1,59 +1,59 @@
 #include "ThreadCache.h"
 #include "CentralCache.h"
 
-void* ThreadCache::FetchFromCentralCache(size_t index, size_t bytes)
+void* ThreadCache::FetchFromCentralCache(size_t index, size_t byte)
 {
-	
-	FreeList& freelist = _freelist[index];
-	size_t num = 10; //一次批量获取十块
+	FreeList* freelist = &_freelist[index];
+	size_t num_to_move = min(ClassSize::NumMoveSize(byte), freelist->MaxSize());
+	void* start, *end;
+	size_t fetchnum = CentralCache::GetInstance()->FetchRangeObj(start, end, num_to_move, byte);
+	if (fetchnum > 1)
+		freelist->PushRange(NextObj(start), end, fetchnum - 1);
 
-	void* start = nullptr;
-	void* end = nullptr;
-	size_t fetchnum = CentralCache::GetInstance()->FetchRangeObj(start, end, num, bytes);
+	if (num_to_move == freelist->MaxSize())
+	{
+		freelist->SetMaxSize(num_to_move + 1);
+	}
 
-	if (fetchnum == 1) //当中心缓存不够
-		return start;
-
-	freelist.PushRange(NextObj(start), end, fetchnum - 1);
 	return start;
 }
 
 void* ThreadCache::Allocate(size_t size)
 {
-	assert(size < MAXBYTES);
-	//首先先进行对齐
-	size = ClassSize::RoundUp(size);
-	//求出位置
-	size_t index = ClassSize::Index(size);
-	FreeList& freelist = _freelist[index];
+	assert(size <= MAXBYTES);
 
-	if (!freelist.Empty())//当自由链表还有内存时
+	// 对齐取整
+	size = ClassSize::Roundup(size);
+	size_t index = ClassSize::Index(size);
+	FreeList* freelist = &_freelist[index];
+	if (!freelist->Empty())
 	{
-		return freelist.Pop();
+		return freelist->Pop();
 	}
-	//自由链表没有内存，要到CentralCache去获取
 	else
 	{
 		return FetchFromCentralCache(index, size);
 	}
 }
 
-void TooLongRecyle(FreeList* freelist, size_t byte)
+void ThreadCache::TooLongRecyle(FreeList* freelist, size_t byte)
 {
 	void* start = freelist->Clear();
-	CentralCache::GetInstance()->ReleaseToSpan(start, byte);
+	CentralCache::GetInstance()->ReleaseListToSpans(start, byte);
 }
 
 void ThreadCache::Deallocate(void* ptr, size_t byte)
 {
-	assert(byte < MAXBYTES);
+	assert(byte <= MAXBYTES);
 	size_t index = ClassSize::Index(byte);
-	FreeList& freelist = _freelist[index];
-	freelist.Push(ptr);
-	
-	//当自由链表的长度大于一次可申请的最大长度是开始进行回收
-	if (freelist.Size() >= freelist.MaxSize())
+	FreeList* freelist = &_freelist[index];
+	freelist->Push(ptr);
+
+	// 当自由链表对象数量超过一次批量从中心缓存移动的数量时
+	// 开始回收对象到中心缓存
+	if (freelist->Size() >= freelist->MaxSize())
 	{
-		TooLongRecyle(&freelist, byte);
+		TooLongRecyle(freelist, byte);
 	}
+	// thread cache总的字节数超过2M，则开始释放
 }

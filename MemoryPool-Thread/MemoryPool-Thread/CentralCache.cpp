@@ -8,60 +8,59 @@ Span* CentralCache::GetOneSpan(SpanList* spanlist, size_t bytes)
 	Span* span = spanlist->begin();
 	while (span != spanlist->end())
 	{
-		if (span != nullptr)
+		if (span->_objlist != nullptr)
 			return span;
 
 		span = span->_next;
 	}
-	
-	//此时说明中心缓存没有，需要向下一层的PageChache申请
+
+	// 向pagecache申请一个新的合适大小的span
 	size_t npage = ClassSize::NumMovePage(bytes);
 	Span* newspan = PageCache::GetInstance()->NewSpan(npage);
 
-	//将申请到的Span切割然后链接起来
+	// 将span的内存切割成对象挂起来
 	char* start = (char*)(newspan->_page_id << PAGE_SHIFT);
 	char* end = start + (newspan->_page_num << PAGE_SHIFT);
 	char* cur = start;
-	char* next = end + bytes;
+	char* next = cur + bytes;
 	while (next < end)
 	{
 		NextObj(cur) = next;
 		cur = next;
-		next = next + bytes;
+		next = cur + bytes;
 	}
-	NextObj(cur);
+	NextObj(cur) = nullptr;
 	newspan->_objlist = start;
-	newspan->_usecount = 0;
 	newspan->_objsize = bytes;
+	newspan->_usecount = 0;
 
-	//最后将他插入到Spanlist中
+	// 将newspan插入到spanlist
 	spanlist->PushFront(newspan);
 	return newspan;
 }
 
-size_t CentralCache::FetchRangeObj(void*& start, void*& end, size_t n, size_t bytes)
+// 从中心缓存获取一定数量的对象给thread cache
+size_t CentralCache::FetchRangeObj(void*& start, void*& end, size_t num, size_t bytes)
 {
-	//计算位置
 	size_t index = ClassSize::Index(bytes);
 	SpanList* spanlist = &_spanlist[index];
-	
-	//因为中心缓存是公共资源所以要加锁
+
+	// 对当前桶进行加锁
 	std::unique_lock<std::mutex> lock(spanlist->_mtx);
 
 	Span* span = GetOneSpan(spanlist, bytes);
 	void* cur = span->_objlist;
-	void* pre = cur;
+	void* prev = cur;
 	size_t fetchnum = 0;
-	//需要几个从当前spanlist取出几个，如果spanlist不够就把有的全给出去
-	while (cur != nullptr && fetchnum < n)
+	while (cur != nullptr && fetchnum < num)
 	{
-		pre = cur;
+		prev = cur;
 		cur = NextObj(cur);
-		fetchnum++;
+		++fetchnum;
 	}
 
 	start = span->_objlist;
-	end = pre;
+	end = prev;
 	NextObj(end) = nullptr;
 
 	span->_objlist = cur;
@@ -70,34 +69,42 @@ size_t CentralCache::FetchRangeObj(void*& start, void*& end, size_t n, size_t by
 	return fetchnum;
 }
 
-void CentralCache::ReleaseToSpan(void* start, size_t byte_size)
+void CentralCache::ReleaseListToSpans(void* start, size_t byte)
 {
-	size_t index = ClassSize::Index(byte_size);
+	size_t index = ClassSize::Index(byte);
 	SpanList* spanlist = &_spanlist[index];
-
 	std::unique_lock<std::mutex> lock(spanlist->_mtx);
 
 	while (start)
 	{
 		void* next = NextObj(start);
-		//将span进行映射，为了后面的合并
 		Span* span = PageCache::GetInstance()->MapObjectToSpan(start);
 
-		if (--span->_usecount == 0)//说明span里面的对象都是空闲的可以还给PageCache进行合并
+		NextObj(start) = span->_objlist;
+		span->_objlist = start;
+
+		//当释放回到空的span，把空的span转移到头上
+		if (span->_objlist == nullptr)
 		{
-			spanlist->Earse(span);
+			spanlist->Erase(span);
+
+		}
+
+		// usecount == 0表示span切出去的对象都还回来了
+		// 释放span回到pagecache进行合并
+		if (--span->_usecount == 0)
+		{
+			spanlist->Erase(span);
 
 			span->_objlist = nullptr;
 			span->_objsize = 0;
-			span->_pre = nullptr;
+			span->_prev = nullptr;
 			span->_next = nullptr;
 
 			PageCache::GetInstance()->ReleaseSpanToPageCahce(span);
 		}
 
-		NextObj(start) = span->_objlist;
-		span->_objlist = start;
-
 		start = next;
 	}
 }
+

@@ -10,22 +10,21 @@ public:
 		return &_inst;
 	}
 
+	Span* _NewSpan(size_t npage);
 	Span* NewSpan(size_t npage);
-	//获取映射 对象和Span的映射
-	Span* MapObjectToSpan(void* obj);
 
+	// 获取从对象到span的映射
+	Span* MapObjectToSpan(void* obj);
 	// 释放空闲span回到Pagecache，并合并相邻的span
 	void ReleaseSpanToPageCahce(Span* span);
 
 private:
-	SpanList _pagelist[NPAGE];
-
+	SpanList _pagelist[NPAGES];
+private:
 	PageCache() = default;
-	PageCache(const PageCache& p) = delete;
-	PageCache& operator=(const PageCache& p) = delete;
-
-	//完成Span和页号的映射
-	std::unordered_map<PageId, Span*> _id_span_map;
-
+	PageCache(const PageCache&) = delete;
 	static PageCache _inst;
+
+	std::mutex _mtx;
+	std::map<PageId, Span*> _id_span_map;
 };

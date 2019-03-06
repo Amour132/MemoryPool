@@ -27,7 +27,10 @@
     <ClInclude Include="PageCache.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ConcurrentAlloc.h">
+    <ClInclude Include="Alloc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="benchmark.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
